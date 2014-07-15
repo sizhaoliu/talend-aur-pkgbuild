@@ -1,0 +1,45 @@
+# Maintainer: Sizhao LIU <sizhaoliu@talend.com>
+# Credits: vdemeester 
+
+pkgname="talend-open-studio-di"
+_altname="Talend Open Studio for Data Integration"
+_shortname="TOS_DI"
+_altshortname="tos"
+pkgver="5.3.1"
+_build="r104014"
+pkgrel=1
+pkgdesc="Open-source data integration software from Talend."
+arch=('i686' 'x86_64')
+url=("http://www.talend.com")
+license=("GPL2")
+depends=("gtk2" "glib2")
+options=("!strip")
+
+# Choose your prefered site, default value is US.
+_hostsite=("http://talend.dreamhosters.com") # US server
+#_hostsite=("http://download-mirror1.talend.com") # Europe server
+
+source=("${_hostsite}/tos/release/V${pkgver}/${_shortname}-${_build}-V${pkgver}.zip" 
+	"${_shortname// /}.desktop")
+md5sums=("3aa7964dea601ab0c3415b1a6875da73"
+	"de3bd58222a925ce962bad734174db79")
+
+build(){
+	
+    install -dm755 ${pkgdir}/opt ${pkgdir}/usr/bin ${pkgdir}/usr/share/applications || return 1    
+    
+    # Remove all non-Linux startup scripts   
+    cd ${srcdir}/${_shortname}-${_build}-V${pkgver} &&
+    rm -rf  *macosx* *solaris* *gtk-ppc* *win* || return 1
+  
+    cp -Rp ${srcdir}/${_shortname}-${_build}-V${pkgver} ${pkgdir}/opt/${_shortname}-${_build}-V${pkgver} || return 1
+
+    # Link application icon
+    ln -s /opt/${_shortname}-${_build}-V${pkgver}/plugins/org.talend.rcp.branding.${_altshortname}_${pkgver}.${_build}/icons/appli_32x32.gif ${pkgdir}/opt/${_shortname}-${_build}-V${pkgver}/icon.gif
+
+    # Link executable based on architecture
+    install -m 0755 ${srcdir}/${_shortname// /}.desktop ${pkgdir}/usr/share/applications/ || return 1
+    
+    ln -s /opt/${_shortname}-${_build}-V${pkgver}/${_shortname// /}-linux-gtk-${CARCH//i6/x} ${pkgdir}/usr/bin/${pkgname} || return 1
+    chmod +x ${pkgdir}/opt/${_shortname}-${_build}-V${pkgver}/${_shortname// /}-linux-gtk-${CARCH//i6/x} || return 1      
+  }
